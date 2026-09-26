@@ -3,8 +3,12 @@ package main
 import (
 	"GatorRss/Commands"
 	"GatorRss/internal/config"
+	"GatorRss/internal/database"
+	"database/sql"
 	"log"
 	"os"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -13,7 +17,15 @@ func main() {
 		log.Fatalln("", err)
 	}
 
+	db, err := sql.Open("postgres", c.Url)
+	if err != nil {
+		log.Fatalf("error connecting to db: %v", err)
+	}
+	defer db.Close()
+	dbQueries := database.New(db)
+
 	main_state := &Commands.State{
+		Db:     dbQueries,
 		Config: &c,
 	}
 
@@ -21,7 +33,10 @@ func main() {
 		Handler_Map: make(map[string]func(*Commands.State, Commands.Command) error),
 	}
 
-	commandList.Register("Login", Commands.HandlerLogin)
+	err = commandList.RegisterCommands()
+	if err != nil {
+		log.Fatalf("Failed to register commands: %v", err)
+	}
 
 	args := os.Args
 	if len(args) < 2 {
