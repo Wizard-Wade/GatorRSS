@@ -63,6 +63,40 @@ func registerHandler(s *State, cmd Command) error {
 	return nil
 }
 
+func resetHandler(s *State, cmd Command) error {
+	if len(cmd.Arguments) > 0 {
+		return fmt.Errorf("Invalid argument provided. Reset accepts 0 arguments")
+	}
+
+	resetErr := s.Db.ClearUsers(context.Background())
+	if resetErr != nil {
+		return resetErr
+	}
+
+	fmt.Println("User Table Reset")
+	return nil
+}
+
+func usersHandler(s *State, cmd Command) error {
+	if len(cmd.Arguments) > 0 {
+		return fmt.Errorf("Invalid argument provided. Reset accepts 0 arguments")
+	}
+
+	users, err := s.Db.GetUsers(context.Background())
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
+		fmt.Print("", user)
+		if user == s.Config.Current_user_name {
+			fmt.Print(" (current)")
+		}
+		fmt.Print("\n")
+	}
+	return nil
+}
+
 type Commands struct {
 	Handler_Map map[string]func(*State, Command) error
 }
@@ -87,6 +121,16 @@ func (c *Commands) RegisterCommands() error {
 	}
 
 	err = c.register("Register", registerHandler)
+	if err != nil {
+		return err
+	}
+
+	err = c.register("Reset", resetHandler)
+	if err != nil {
+		return err
+	}
+
+	err = c.register("Users", usersHandler)
 	if err != nil {
 		return err
 	}
