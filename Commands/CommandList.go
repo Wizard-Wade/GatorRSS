@@ -97,6 +97,34 @@ func usersHandler(s *State, cmd Command) error {
 	return nil
 }
 
+func addFeedHandler(s *State, cmd Command) error {
+	if len(cmd.Arguments) != 2 {
+		return fmt.Errorf("Invalid argument provided. Add Feed accepts 2 arguments NAME & URL")
+	}
+
+	userName := s.Config.Current_user_name
+
+	uid, err := s.Db.GetUser(context.Background(), userName)
+
+	params := database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      cmd.Arguments[0],
+		Url:       cmd.Arguments[1],
+		UserID:    uid.ID,
+	}
+	_, err = s.Db.CreateFeed(context.Background(), params)
+
+	if err != nil {
+		return err
+	} else {
+		fmt.Print("added the url")
+	}
+
+	return nil
+}
+
 type Commands struct {
 	Handler_Map map[string]func(*State, Command) error
 }
@@ -131,6 +159,16 @@ func (c *Commands) RegisterCommands() error {
 	}
 
 	err = c.register("Users", usersHandler)
+	if err != nil {
+		return err
+	}
+
+	err = c.register("agg", aggregateHandler)
+	if err != nil {
+		return err
+	}
+
+	err = c.register("addfeed", addFeedHandler)
 	if err != nil {
 		return err
 	}
