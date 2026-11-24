@@ -2,6 +2,7 @@ package main
 
 import (
 	"GatorRss/Commands"
+	CommandTypes "GatorRss/Commands/Types"
 	"GatorRss/internal/config"
 	"GatorRss/internal/database"
 	"database/sql"
@@ -24,13 +25,13 @@ func main() {
 	defer db.Close()
 	dbQueries := database.New(db)
 
-	main_state := &Commands.State{
+	main_state := &CommandTypes.State{
 		Db:     dbQueries,
 		Config: &c,
 	}
 
 	commandList := Commands.Commands{
-		Handler_Map: make(map[string]func(*Commands.State, Commands.Command) error),
+		Handler_Map: make(map[string]func(*CommandTypes.State, CommandTypes.Command) error),
 	}
 
 	err = commandList.RegisterCommands()
@@ -43,7 +44,7 @@ func main() {
 		log.Fatalln("Invalid argument provided. Expected at least one argument beyond application name")
 	}
 
-	cmd := Commands.Command{
+	cmd := CommandTypes.Command{
 		Name:      args[1],
 		Arguments: args[2:],
 	}

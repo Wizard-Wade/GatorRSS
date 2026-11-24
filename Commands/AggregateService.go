@@ -1,6 +1,7 @@
 package Commands
 
 import (
+	CommandTypes "GatorRss/Commands/Types"
 	"context"
 	"fmt"
 	"html"
@@ -10,7 +11,7 @@ const (
 	feedUrl = "https://www.wagslane.dev/index.xml"
 )
 
-func aggregateHandler(s *State, cmd Command) error {
+func aggregateHandler(s *CommandTypes.State, cmd CommandTypes.Command) error {
 	if len(cmd.Arguments) > 0 {
 		return fmt.Errorf("Invalid argument provided. Aggregate accepts 0 arguments")
 	}
