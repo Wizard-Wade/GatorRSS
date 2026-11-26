@@ -49,7 +49,7 @@ func addFollow(s *CommandTypes.State, url string, user database.User) (*database
 
 func followingHandler(s *CommandTypes.State, cmd CommandTypes.Command, user database.User) error {
 	if len(cmd.Arguments) != 0 {
-		return fmt.Errorf("Invalid argument provided. List Feeds accepts one NO argument.")
+		return fmt.Errorf("Invalid argument provided. List Feeds accepts NO argument.")
 	}
 
 	feeds, err := s.Db.GetFeedFollowsForUser(context.Background(), user.ID)
@@ -60,6 +60,32 @@ func followingHandler(s *CommandTypes.State, cmd CommandTypes.Command, user data
 	for i, feed := range feeds {
 		fmt.Printf("\t%d: %s\n", i, feed.FeedName)
 	}
+
+	return nil
+}
+
+func unfollowHandler(s *CommandTypes.State, cmd CommandTypes.Command, user database.User) error {
+	if len(cmd.Arguments) != 1 {
+		return fmt.Errorf("Invalid argument provided. Unfollow feed excepts 1 URL argument.")
+	}
+
+	url := cmd.Arguments[0]
+	feed, err := s.Db.GetFeedByURL(context.Background(), url)
+	if err != nil {
+		return err
+	}
+
+	deleteParams := database.DeleteFollowParams{
+		UserID: user.ID,
+		FeedID: feed.ID,
+	}
+
+	err = s.Db.DeleteFollow(context.Background(), deleteParams)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s no longer following %s\n", user.Name, url)
 
 	return nil
 }

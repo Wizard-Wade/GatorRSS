@@ -85,5 +85,10 @@ func (c *Commands) RegisterCommands() error {
 		return err
 	}
 
+	err = c.register("unfollow", CommandHelpers.DefaultLogin(unfollowHandler))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
